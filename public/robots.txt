@@ -1,4 +1,13 @@
+# Slyfox — robots.txt
+# https://slyfox.com.co
+
 User-agent: *
 Allow: /
 
+# Rutas sin valor SEO
+Disallow: /api/
+Disallow: /_astro/
+Disallow: /404
+
+# Sitemap generado por @astrojs/sitemap en build
 Sitemap: https://slyfox.com.co/sitemap-index.xml

@@ -107,7 +107,7 @@ const WA_NUMBER = import.meta.env.PUBLIC_WA_NUMBER ?? '57XXXXXXXXXX';
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 6px 24px rgba(37,211,102,0.5);
-    transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+    transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease, opacity 0.22s ease, right 0.28s cubic-bezier(0.4,0,0.2,1);
 }
 .wa-btn:hover {
     transform: scale(1.1) translateY(-2px);
@@ -486,4 +486,42 @@ const WA_NUMBER = import.meta.env.PUBLIC_WA_NUMBER ?? '57XXXXXXXXXX';
     });
 
     buildLink();
+
+    // Mueve el botón a la izquierda cuando el ServicePanel está abierto
+    const svcPanel = document.getElementById('svc-panel');
+    const PANEL_WIDTH = 'min(580px, 92vw)';
+
+    function onPanelOpen() {
+        btn.style.transition = 'right 0.28s cubic-bezier(0.4,0,0.2,1), transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease';
+        btn.style.right = `calc(${PANEL_WIDTH} + 20px)`;
+    }
+    function onPanelClose() {
+        btn.style.right = '';
+        setTimeout(() => { btn.style.transition = ''; }, 300);
+    }
+
+    if (svcPanel) {
+        const observer = new MutationObserver(() => {
+            const isOpen = svcPanel.classList.contains('open');
+            const isMobile = window.innerWidth < 768;
+
+            if (isOpen) {
+                if (isMobile) {
+                    // Móvil: ocultar completamente
+                    btn.style.opacity = '0';
+                    btn.style.pointerEvents = 'none';
+                    btn.style.transform = 'scale(0.7)';
+                } else {
+                    // Desktop: mover a la izquierda del panel
+                    onPanelOpen();
+                }
+            } else {
+                btn.style.opacity = '';
+                btn.style.pointerEvents = '';
+                btn.style.transform = '';
+                onPanelClose();
+            }
+        });
+        observer.observe(svcPanel, { attributes: true, attributeFilter: ['class'] });
+    }
 </script>

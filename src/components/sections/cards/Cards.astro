@@ -114,7 +114,7 @@ const meta = [
   let locked    = false; // cooldown entre cambios
 
   const FADE    = [1, 0.28, 0.13, 0.07, 0.05];
-  const COOLDOWN = 680; // ms — duración de la transición CSS
+  const COOLDOWN = 420; // ms — duración de la transición CSS
 
   // ── Inicializa opacidades en el primer render ──────────
   function initNames(idx: number) {
@@ -159,52 +159,59 @@ const meta = [
     current = idx;
   }
 
+  // Slot fijo: 50vh por servicio (independiente del height total de la sección)
+  // height total = (N-1)*slot + viewport = 4*50vh + 100vh = 300vh
+  function slotHeight() {
+    return window.innerHeight * 0.5;
+  }
+
+  function sectionTop() {
+    return section.getBoundingClientRect().top + window.scrollY;
+  }
+
   // ── Comprueba si la sección está "fijada" en pantalla ──
   function isSectionActive(): boolean {
     const rect = section.getBoundingClientRect();
     return rect.top <= 1 && rect.bottom >= window.innerHeight - 1;
   }
 
-  // ── Wheel: un tick = un servicio, instantáneo ─────────
+  // ── Wheel: un tick = un servicio ──────────────────────
   function handleWheel(e: WheelEvent) {
     if (!isSectionActive()) return;
 
     const dir  = e.deltaY > 0 ? 1 : -1;
     const next = current + dir;
 
-    // En los bordes → deja pasar el scroll natural de la página
     if (next < 0 || next >= COUNT) return;
 
-    e.preventDefault();
+    // Prevenir SOLO cuando vamos a hacer la transición.
+    // Si locked, dejamos pasar el evento (el scroll listener re-sincroniza luego).
     if (locked) return;
+
+    e.preventDefault();
     locked = true;
 
-    // Mueve el scroll de la página al slot correcto (sin animación)
-    // para que la sección permanezca sticky en el lugar exacto
-    const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top: sectionTop + next * window.innerHeight });
-
+    window.scrollTo({ top: sectionTop() + next * slotHeight() });
     activate(next);
     setTimeout(() => { locked = false; }, COOLDOWN);
   }
 
   window.addEventListener('wheel', handleWheel, { passive: false });
 
-  // ── Touch (mobile/trackpad): gesto = cambio ───────────
+  // ── Touch: gesto = cambio ────────────────────────────
   let touchStartY = 0;
   window.addEventListener('touchstart', (e) => {
     touchStartY = e.touches[0].clientY;
   }, { passive: true });
   window.addEventListener('touchend', (e) => {
     if (!isSectionActive() || locked) return;
-    const dy   = touchStartY - e.changedTouches[0].clientY;
-    if (Math.abs(dy) < 30) return;            // gesto mínimo 30 px
+    const dy  = touchStartY - e.changedTouches[0].clientY;
+    if (Math.abs(dy) < 30) return;
     const dir  = dy > 0 ? 1 : -1;
     const next = current + dir;
     if (next < 0 || next >= COUNT) return;
     locked = true;
-    const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top: sectionTop + next * window.innerHeight });
+    window.scrollTo({ top: sectionTop() + next * slotHeight() });
     activate(next);
     setTimeout(() => { locked = false; }, COOLDOWN);
   }, { passive: true });
@@ -214,19 +221,18 @@ const meta = [
     n.addEventListener('click', () => {
       if (locked) return;
       locked = true;
-      const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: sectionTop + i * window.innerHeight });
+      window.scrollTo({ top: sectionTop() + i * slotHeight(), behavior: 'smooth' });
       activate(i);
       setTimeout(() => { locked = false; }, COOLDOWN);
     });
   });
 
-  // ── Sincroniza si el usuario llega con scroll libre ───
+  // ── Scroll libre (trackpad, barra, teclado) ───────────
   window.addEventListener('scroll', () => {
     if (locked) return;
     const rect     = section.getBoundingClientRect();
     const scrolled = Math.max(0, -rect.top);
-    const idx      = Math.min(Math.floor(scrolled / window.innerHeight), COUNT - 1);
+    const idx      = Math.min(Math.floor(scrolled / slotHeight()), COUNT - 1);
     if (idx !== current) activate(idx);
   }, { passive: true });
 
@@ -240,10 +246,11 @@ const meta = [
 </script>
 
 <style>
-/* ── Sección: (COUNT + 1) × 100vh crea el espacio de scroll ── */
+/* ── Sección: (N-1)×50vh + 100vh = 300vh para 5 servicios ──
+   Formula: cada slot = 50vh, más 1 viewport de buffer al final   */
 .sdr-section {
   background: #060606;
-  height: 500vh;
+  height: 300vh;
 }
 
 /* Sticky — ambos lados fijos en pantalla */
@@ -278,7 +285,7 @@ const meta = [
   left: 0;
   right: 0;
   z-index: 5;
-  padding: 36px 56px 28px;
+  padding: 24px 28px 20px;
   background: linear-gradient(
     to bottom,
     #060606 60%,
@@ -319,7 +326,7 @@ const meta = [
   inset: 0;
   display: flex;
   align-items: center;
-  padding-top: 160px; /* espacio para el header */
+  padding-top: 130px; /* espacio para el header */
   opacity: 0;
   pointer-events: none;
 }
@@ -584,7 +591,38 @@ html:not(.dark) .sdr-line {
   background: var(--cl);
 }
 
-/* Reducir movimiento */
+/* ── Tablet 768–1023px ───────────────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .sdr-wrap {
+    grid-template-columns: 52% 48%;
+  }
+  .sdr-content {
+    padding: 0 28px;
+  }
+  .sdr-names {
+    padding: 0 24px;
+  }
+  .sdr-name {
+    font-size: clamp(1.6rem, 4vw, 3rem);
+  }
+  .sdr-icon-wrap {
+    width: 80px;
+    height: 80px;
+  }
+  .sdr-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .sdr-title {
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  }
+  .sdr-cta {
+    padding: 10px 18px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ── Reducir movimiento */
 @media (prefers-reduced-motion: reduce) {
   .sdr-slide,
   .sdr-slide.active,

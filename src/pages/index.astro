@@ -9,17 +9,75 @@ import Tools from '@components/sections/imagetools/Tools.astro';
 import QuestionsAnswers from '@components/sections/questions/cardQuestionsAnswers.astro';
 import Finaltext from "@components/sections/finaltext/final-text.astro";
 import Footer from '@components/sections/footer/footer.astro';
+
+// SEO específico de la home — sobrescribe los defaults del Layout
+const seo = {
+  title: 'Slyfox — Software a la Medida y Transformación Digital en Colombia',
+  description: 'Desarrollamos software a la medida, unificamos canales digitales, diseñamos UX/UI y auditamos ciberseguridad para empresas colombianas. Cotización gratis en 24 h.',
+  url: 'https://slyfox.com.co/',
+};
+
+// FAQPage schema — genera rich results en Google (preguntas desplegables en SERP)
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: '¿Cuánto cuesta desarrollar un software a la medida?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Cada proyecto es diferente, por eso no manejamos precios fijos. El costo depende del alcance, la complejidad y el tiempo de entrega. Lo que sí garantizamos: presupuesto claro antes de iniciar, sin letras pequeñas ni sorpresas. Escríbenos y te damos una cotización sin costo en menos de 24 horas.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Cuánto tiempo tarda en estar listo mi proyecto?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Un sitio web o landing page: 2 a 4 semanas. Una aplicación web o móvil a la medida: entre 6 semanas y 4 meses, según su complejidad. Trabajamos con entregas por etapas y te mostramos avances desde la primera semana para que siempre sepas exactamente cómo va tu proyecto.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Tengo que saber de tecnología para trabajar con ustedes?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Para nada. Nuestro equipo se encarga de toda la parte técnica. Tú nos cuentas el problema de tu negocio y nosotros lo convertimos en una solución digital que funciona. Hablamos en tu idioma, no en el de las máquinas.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Qué pasa si el resultado no es lo que esperaba?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Nunca llegamos a ese punto porque trabajamos con validaciones y aprobaciones en cada etapa del proyecto. Pero si algo no está a tu gusto, lo ajustamos sin costo adicional hasta que quedes satisfecho. Tu aprobación es el único indicador que nos importa.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Ofrecen soporte después del lanzamiento?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Sí. Todos nuestros proyectos incluyen un período de soporte post-lanzamiento. Además, ofrecemos planes de mantenimiento mensual para que tu plataforma siempre esté actualizada, segura y funcionando al 100%, sin que tengas que preocuparte por nada técnico.',
+      },
+    },
+  ],
+};
 ---
 
-<Layout>
-    <Hero />
-    <Banner />
-    <div id="servicios" class="scroll-mt-[62px]"></div>
-    <Cards_Mobile />
-    <Cards />
-    <TeamServices />
-    <Tools />
-    <QuestionsAnswers />
-    <Finaltext />
-    <Footer />
+<Layout seo={seo}>
+  <!-- FAQPage — rich results en Google -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+  <Hero />
+  <Banner />
+  <div id="servicios" class="scroll-mt-[62px]"></div>
+  <Cards_Mobile />
+  <Cards />
+  <TeamServices />
+  <Tools />
+  <QuestionsAnswers />
+  <Finaltext />
+  <Footer />
 </Layout>

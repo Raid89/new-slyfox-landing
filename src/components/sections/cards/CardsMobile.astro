@@ -30,7 +30,7 @@ const badgeStyle = [
     {tarjetas.map((tarjeta, i) => (
       <div class="mob-slide px-1">
         <div
-          class="svc-card-wrap bg-[#F5F6FA] dark:bg-[#161616] rounded-2xl p-5 flex flex-col min-h-[400px] sm:min-h-[360px]"
+          class="svc-card-wrap bg-[#F5F6FA] dark:bg-[#161616] rounded-2xl p-5 flex flex-col mob-card-h"
           data-index={i}
           style={`--card-color: ${badgeStyle[i].color}; --card-color-light: ${badgeStyle[i].lightColor};`}
         >
@@ -43,26 +43,26 @@ const badgeStyle = [
           </span>
 
           <!-- Ícono -->
-          <div class="flex justify-center my-4">
+          <div class="flex justify-center my-6">
             <Image
               src={tarjeta.src}
               alt={tarjeta.titulo}
-              class="w-20 h-20 sm:w-18 sm:h-18 object-contain"
+              class="w-24 h-24 object-contain"
             />
           </div>
 
           <!-- Título -->
-          <h3 class="text-[#1E1E1E] dark:text-[#ffffffeb] font-inter font-bold text-[17px] sm:text-xl mb-2 leading-snug">
+          <h3 class="text-[#1E1E1E] dark:text-[#ffffffeb] font-inter font-bold text-[18px] sm:text-xl mb-3 leading-snug">
             {tarjeta.titulo}
           </h3>
 
           <!-- Descripción -->
-          <p class="text-[#86868b] dark:text-[#86868B] font-inter font-semibold text-sm leading-relaxed mb-3">
+          <p class="text-[#86868b] dark:text-[#86868B] font-inter font-semibold text-sm leading-relaxed mb-4">
             {tarjeta.descripcion}
           </p>
 
           <!-- Bullets -->
-          <ul class="list-disc pl-5 space-y-1.5">
+          <ul class="list-disc pl-5 space-y-2">
             {tarjeta.items.map(item => (
               <li class="text-[#86868b] dark:text-[#86868B] font-inter text-sm">{item}</li>
             ))}
@@ -70,7 +70,7 @@ const badgeStyle = [
 
           <!-- CTA — abre el side panel -->
           <button
-            class="svc-open mob-cta mt-auto pt-4"
+            class="svc-open mob-cta mt-auto pt-5"
             data-index={i}
             aria-label={`Ver detalle: ${tarjeta.titulo}`}
           >
@@ -132,6 +132,15 @@ const badgeStyle = [
 
   .mob-dot { width: 8px; height: 8px; }
   .mob-dot.active { width: 20px; background-color: #5137F0; }
+
+  /* Altura adaptable: crece según pantalla, nunca desborda */
+  .mob-card-h {
+    height: clamp(420px, 80svh, 540px);
+  }
+  @media (max-height: 700px) {
+    /* Landscape móvil — pantalla baja */
+    .mob-card-h { height: clamp(360px, 90svh, 440px); }
+  }
 
   /* Badge — light: versión con contraste | dark: vibrante */
   .mob-badge {

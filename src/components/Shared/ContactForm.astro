@@ -71,12 +71,40 @@ const isDark = variant === 'section';
     ></textarea>
   </div>
 
+  <!-- Servicios: acordeón colapsable -->
   <div class="cf-field">
-    <p class="cf-label">¿Cuál de nuestros servicios te interesa?</p>
-    <div class="cf-checks">
-      <label class="cf-check"><input type="checkbox" class="cf-checkbox" /><span>Consultoría TI</span></label>
-      <label class="cf-check"><input type="checkbox" class="cf-checkbox" /><span>Diseño UX/UI</span></label>
-      <label class="cf-check"><input type="checkbox" class="cf-checkbox" /><span>Desarrollo de software a la medida</span></label>
+    <button type="button" class="cf-svc-toggle" aria-expanded="false" aria-controls="cf-svc-list">
+      <span class="cf-label" style="margin:0">¿Qué servicio te interesa?</span>
+      <span class="cf-svc-optional">opcional</span>
+      <svg class="cf-svc-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+        <path d="M6 9l6 6 6-6"/>
+      </svg>
+    </button>
+
+    <div id="cf-svc-list" class="cf-svc-list" hidden>
+      {[
+        { name: 'Software a la medida',     color: '#FF6B6B', tip: 'Sistemas web, móvil o ERP construidos exactamente para tu operación.' },
+        { name: 'Canales digitales',         color: '#C5F135', tip: 'CRM, WhatsApp, Instagram y correo unificados en una sola plataforma.' },
+        { name: 'Transformación digital',    color: '#00E5AA', tip: 'Diagnóstico y hoja de ruta para digitalizar cómo trabaja tu empresa.' },
+        { name: 'Diseño UI / UX',           color: '#7C6FF5', tip: 'Interfaces que los usuarios entienden desde el primer clic.' },
+        { name: 'Ciberseguridad',           color: '#F43F62', tip: 'Auditorías, cumplimiento GDPR e ISO 27001 para proteger tu negocio.' },
+      ].map(s => (
+        <label class="cf-pill" style={`--pc:${s.color}`}>
+          <input type="checkbox" class="cf-checkbox cf-pill-input" name="servicios" value={s.name} />
+          <span class="cf-pill-dot" aria-hidden="true"></span>
+          <span class="cf-pill-name">{s.name}</span>
+          <span class="cf-tip-wrap" aria-label={`Más info: ${s.tip}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            <span class="cf-tip-bubble" role="tooltip">{s.tip}</span>
+          </span>
+        </label>
+      ))}
     </div>
   </div>
 
@@ -139,25 +167,150 @@ const isDark = variant === 'section';
   min-height: 88px;
 }
 
-/* Checkboxes */
-.cf-checks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  margin-top: 4px;
-}
-
-.cf-check {
+/* ── Acordeón de servicios ──────────────────────────── */
+.cf-svc-toggle {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.cf-svc-optional {
+  font-family: var(--font-inter);
+  font-size: 0.75rem;
+  color: #86868B;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+.cf-svc-chevron {
+  margin-left: auto;
+  color: #86868B;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.cf-svc-toggle[aria-expanded="true"] .cf-svc-chevron {
+  transform: rotate(180deg);
+}
+
+/* Lista de servicios */
+.cf-svc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  animation: cf-reveal 0.22s ease;
+}
+.cf-svc-list[hidden] { display: none; }
+
+@keyframes cf-reveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pill individual */
+.cf-pill {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 13px;
+  border-radius: 10px;
+  border: 1.5px solid #e5e5ea;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+  position: relative;
   font-family: var(--font-inter);
   font-size: 0.875rem;
   color: #1E1E1E;
-  cursor: pointer;
+  user-select: none;
+}
+.cf-form--dark .cf-pill {
+  border-color: #2a2a2a;
+  color: #F5F5F7;
+}
+.cf-pill:hover {
+  border-color: var(--pc);
+  background: color-mix(in srgb, var(--pc) 6%, transparent);
 }
 
-.cf-form--dark .cf-check { color: #F5F5F7; }
+/* Checkbox hidden — pill actúa como toggle */
+.cf-pill-input {
+  position: absolute;
+  opacity: 0;
+  width: 0; height: 0;
+  pointer-events: none;
+}
+
+/* Dot de color */
+.cf-pill-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--pc);
+  flex-shrink: 0;
+  transition: background 0.18s;
+}
+.cf-pill-input:checked ~ .cf-pill-dot {
+  background: var(--pc);
+}
+
+/* Nombre */
+.cf-pill-name { flex: 1; }
+
+/* Pill seleccionada */
+.cf-pill:has(.cf-pill-input:checked) {
+  border-color: var(--pc);
+  background: color-mix(in srgb, var(--pc) 8%, transparent);
+}
+
+/* ── Tooltip ────────────────────────────────────────── */
+.cf-tip-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: #86868B;
+  flex-shrink: 0;
+  cursor: default;
+}
+.cf-tip-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  width: 210px;
+  background: #1E1E1E;
+  color: #F5F5F7;
+  font-family: var(--font-inter);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 8px 11px;
+  border-radius: 9px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 10;
+  white-space: normal;
+}
+.cf-tip-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 4px;
+  border: 5px solid transparent;
+  border-top-color: #1E1E1E;
+}
+/* Mostrar en hover */
+.cf-tip-wrap:hover .cf-tip-bubble,
+.cf-tip-wrap:focus-within .cf-tip-bubble,
+.cf-tip-wrap.tip-open .cf-tip-bubble {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 .cf-checkbox {
   width: 15px;
@@ -203,6 +356,30 @@ const isDark = variant === 'section';
    * feedback al usuario. Conectar al backend real reemplazando
    * el bloque marcado con TODO.
    */
+  // ── Acordeón de servicios ────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('.cf-svc-toggle').forEach(toggle => {
+    const list = document.getElementById(toggle.getAttribute('aria-controls') ?? '');
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      if (list) list.hidden = open;
+    });
+  });
+
+  // ── Tooltip tap en móvil ──────────────────────────────
+  document.querySelectorAll<HTMLElement>('.cf-tip-wrap').forEach(tip => {
+    tip.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = tip.classList.contains('tip-open');
+      document.querySelectorAll('.cf-tip-wrap').forEach(t => t.classList.remove('tip-open'));
+      if (!isOpen) tip.classList.add('tip-open');
+    });
+  });
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.cf-tip-wrap').forEach(t => t.classList.remove('tip-open'));
+  });
+
   document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach((form) => {
     const feedback = form.querySelector<HTMLElement>('.cf-feedback');
     const submit   = form.querySelector<HTMLButtonElement>('.cf-submit');

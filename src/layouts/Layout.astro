@@ -9,11 +9,11 @@ import "@styles/global.css"
 const canonicalURL = new URL(Astro.url.pathname, 'https://slyfox.com.co').toString();
 
 const defaultSEO = {
-  title: 'Slyfox - Soluciones Digitales Innovadoras',
-  description: 'Desarrollamos soluciones digitales a medida para impulsar tu negocio al siguiente nivel con tecnología de punta y diseño excepcional.',
-  image: '/images/og-image.jpg',
+  title: 'Slyfox — Desarrollo de Software a la Medida en Colombia',
+  description: 'Agencia colombiana especializada en software a la medida, transformación digital, diseño UX/UI, canales digitales y ciberseguridad. Cotización gratuita en 24 h.',
+  image: 'https://slyfox.com.co/images/og-image.jpg',
   url: canonicalURL,
-  type: 'website'
+  type: 'website' as const,
 };
 
 const seoConfig = {
@@ -78,30 +78,108 @@ const seoConfig = {
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#5137F0" />
 
-    <!-- Schema.org Organization -->
+    <!-- Schema.org: LocalBusiness + ProfessionalService (máximo impacto local) -->
     <script type="application/ld+json" is:inline>
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
+        "@type": ["LocalBusiness", "ProfessionalService"],
+        "@id": "https://slyfox.com.co/#organization",
         "name": "Slyfox S.A.S",
+        "alternateName": "Slyfox",
         "url": "https://slyfox.com.co",
-        "logo": "https://slyfox.com.co/favicon.svg",
-        "description": "Desarrollamos soluciones digitales a medida: aplicaciones web, móviles, diseño UX/UI y software a la medida en Colombia.",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://slyfox.com.co/favicon.svg",
+          "width": 112,
+          "height": 112
+        },
+        "image": "https://slyfox.com.co/images/og-image.jpg",
+        "description": "Agencia colombiana especializada en software a la medida, transformación digital, diseño UX/UI, canales digitales y ciberseguridad para empresas.",
+        "priceRange": "$$",
         "address": {
           "@type": "PostalAddress",
           "addressCountry": "CO",
           "addressRegion": "Colombia"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": 4.710989,
+          "longitude": -74.072092
+        },
+        "sameAs": [
+          "https://www.instagram.com/slyfoxco",
+          "https://www.linkedin.com/company/slyfoxco",
+          "https://www.facebook.com/slyfoxco",
+          "https://www.tiktok.com/@slyfoxco"
+        ],
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Servicios de tecnología para empresas",
+          "itemListElement": [
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Software a la medida",
+                "description": "Aplicaciones web, móvil y sistemas empresariales construidos exactamente para la operación del cliente."
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Canales digitales unificados",
+                "description": "CRM, WhatsApp, redes sociales y e-commerce integrados en una sola plataforma de gestión."
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Transformación digital",
+                "description": "Diagnóstico tecnológico y hoja de ruta por etapas para digitalizar la operación de la empresa."
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Diseño UI/UX",
+                "description": "Investigación de usuarios, wireframes e interfaces en Figma listas para desarrollo."
+              }
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Service",
+                "name": "Ciberseguridad",
+                "description": "Auditorías de seguridad, cifrado de datos y cumplimiento Ley 1581, GDPR e ISO 27001."
+              }
+            }
+          ]
         }
       }
     </script>
 
-    <!-- Schema.org WebSite -->
+    <!-- Schema.org: WebSite con SearchAction (habilita sitelinks searchbox en Google) -->
     <script type="application/ld+json" is:inline>
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
+        "@id": "https://slyfox.com.co/#website",
+        "url": "https://slyfox.com.co",
         "name": "Slyfox",
-        "url": "https://slyfox.com.co"
+        "description": "Agencia de desarrollo de software y transformación digital en Colombia",
+        "publisher": { "@id": "https://slyfox.com.co/#organization" },
+        "inLanguage": "es-CO",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://slyfox.com.co/?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
       }
     </script>
   </head>
