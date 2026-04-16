@@ -18,7 +18,12 @@ const { variant = 'modal', prefix = 'cf' } = Astro.props;
 const isDark = variant === 'section';
 ---
 
-<form class={`cf-form${isDark ? ' cf-form--dark' : ''}`} novalidate data-contact-form>
+<form
+  class={`cf-form${isDark ? ' cf-form--dark' : ''}`}
+  novalidate
+  data-contact-form
+  data-contact-endpoint="/api/contact/"
+>
 
   <div class="cf-field">
     <label class="cf-label" for={`${prefix}-nombre`}>
@@ -26,6 +31,7 @@ const isDark = variant === 'section';
     </label>
     <input
       id={`${prefix}-nombre`}
+      name="nombre"
       type="text"
       placeholder="Escribe tu nombre o apodo…"
       class="cf-input"
@@ -40,6 +46,7 @@ const isDark = variant === 'section';
     </label>
     <input
       id={`${prefix}-correo`}
+      name="correo"
       type="email"
       placeholder="@tuempresa.com"
       class="cf-input"
@@ -54,6 +61,7 @@ const isDark = variant === 'section';
     </label>
     <input
       id={`${prefix}-tel`}
+      name="telefono"
       type="tel"
       placeholder="301 xxx - xxx - xxx"
       class="cf-input"
@@ -65,6 +73,7 @@ const isDark = variant === 'section';
     <label class="cf-label" for={`${prefix}-msg`}>¿Cómo podemos ayudarte?</label>
     <textarea
       id={`${prefix}-msg`}
+      name="mensaje"
       rows="3"
       placeholder="¿Quieres que hagamos realidad tus ideas? Cuéntanos sobre tu negocio aquí."
       class="cf-input cf-textarea"
@@ -73,7 +82,12 @@ const isDark = variant === 'section';
 
   <!-- Servicios: acordeón colapsable -->
   <div class="cf-field">
-    <button type="button" class="cf-svc-toggle" aria-expanded="false" aria-controls="cf-svc-list">
+    <button
+      type="button"
+      class="cf-svc-toggle"
+      aria-expanded="false"
+      aria-controls={`${prefix}-svc-list`}
+    >
       <span class="cf-label" style="margin:0">¿Qué servicio te interesa?</span>
       <span class="cf-svc-optional">opcional</span>
       <svg class="cf-svc-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
@@ -83,7 +97,7 @@ const isDark = variant === 'section';
       </svg>
     </button>
 
-    <div id="cf-svc-list" class="cf-svc-list" hidden>
+    <div id={`${prefix}-svc-list`} class="cf-svc-list" hidden>
       {[
         { name: 'Software a la medida',     color: '#FF6B6B', tip: 'Sistemas web, móvil o ERP construidos exactamente para tu operación.' },
         { name: 'Canales digitales',         color: '#C5F135', tip: 'CRM, WhatsApp, Instagram y correo unificados en una sola plataforma.' },
@@ -348,14 +362,18 @@ const isDark = variant === 'section';
 
 .cf-submit:hover  { background: #3f28d4; transform: scale(1.02); }
 .cf-submit:active { transform: scale(0.99); }
+.cf-submit[disabled] {
+  opacity: 1;
+  cursor: wait;
+}
+.cf-submit[disabled]:hover,
+.cf-submit[disabled]:active {
+  background: #5137F0;
+  transform: none;
+}
 </style>
 
 <script>
-  /**
-   * Manejo básico del envío: valida campos requeridos y muestra
-   * feedback al usuario. Conectar al backend real reemplazando
-   * el bloque marcado con TODO.
-   */
   // ── Acordeón de servicios ────────────────────────────
   document.querySelectorAll<HTMLButtonElement>('.cf-svc-toggle').forEach(toggle => {
     const list = document.getElementById(toggle.getAttribute('aria-controls') ?? '');
@@ -382,34 +400,66 @@ const isDark = variant === 'section';
 
   document.querySelectorAll<HTMLFormElement>('[data-contact-form]').forEach((form) => {
     const feedback = form.querySelector<HTMLElement>('.cf-feedback');
-    const submit   = form.querySelector<HTMLButtonElement>('.cf-submit');
+    const submit = form.querySelector<HTMLButtonElement>('.cf-submit');
+    const endpoint = form.dataset.contactEndpoint ?? '/api/contact/';
+
+    const setFeedback = (message: string, isError = false) => {
+      if (!feedback) return;
+      feedback.textContent = message;
+      feedback.className = isError ? 'cf-feedback error' : 'cf-feedback';
+    };
+
+    const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const nombre = (form.querySelector('input[type="text"]') as HTMLInputElement)?.value.trim();
-      const correo = (form.querySelector('input[type="email"]') as HTMLInputElement)?.value.trim();
+      const formData = new FormData(form);
+      const nombre = String(formData.get('nombre') ?? '').trim();
+      const correo = String(formData.get('correo') ?? '').trim();
 
       if (!nombre || !correo) {
-        if (feedback) {
-          feedback.textContent = 'Por favor completa los campos requeridos.';
-          feedback.className = 'cf-feedback error';
-        }
+        setFeedback('Por favor completa los campos requeridos.', true);
+        return;
+      }
+
+      if (!isValidEmail(correo)) {
+        setFeedback('Ingresa un correo valido.', true);
         return;
       }
 
       if (submit) submit.disabled = true;
-      if (feedback) { feedback.textContent = 'Enviando…'; feedback.className = 'cf-feedback'; }
+      setFeedback('Enviando...');
 
       try {
-        // TODO: reemplazar con el endpoint real cuando esté listo
-        // await fetch('/api/contact', { method: 'POST', body: new FormData(form) });
-        await new Promise((r) => setTimeout(r, 800)); // simulación temporal
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Accept: 'application/json',
+          },
+        });
 
-        if (feedback) { feedback.textContent = '¡Mensaje enviado! Te contactaremos pronto. 🦊'; feedback.className = 'cf-feedback'; }
+        let payload: { message?: string } = {};
+
+        try {
+          payload = await response.json();
+        } catch {
+          payload = {};
+        }
+
+        if (!response.ok) {
+          throw new Error(payload.message || 'Ocurrio un error. Intenta de nuevo.');
+        }
+
+        setFeedback(payload.message || 'Mensaje enviado. Te contactaremos pronto.');
         form.reset();
-      } catch {
-        if (feedback) { feedback.textContent = 'Ocurrió un error. Intenta de nuevo.'; feedback.className = 'cf-feedback error'; }
+      } catch (error) {
+        const message =
+          error instanceof Error && error.message
+            ? error.message
+            : 'Ocurrio un error. Intenta de nuevo.';
+        setFeedback(message, true);
       } finally {
         if (submit) submit.disabled = false;
       }

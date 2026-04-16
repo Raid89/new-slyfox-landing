@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
 import icon from 'astro-icon';
 import sitemap from '@astrojs/sitemap';
@@ -9,6 +10,7 @@ export default defineConfig({
   site: 'https://slyfox.com.co',
   trailingSlash: 'always',
   output: 'static',
+  adapter: vercel(),
 
   // Optimización de imágenes — convierte a WebP/AVIF, comprime
   image: {
